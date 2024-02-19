@@ -7,3 +7,5 @@
 
 ## Page Analyzer is a website that analyzes the specified pages for SEO suitability.
 #### The website is based on the Javelin framework. Here, the basic principles of building modern websites on the MVC architecture are worked out: working with routing, query handlers and a template engine, interacting with the database via ORM.
+
+Demo: https://page-analyzer-1nmy.onrender.com
