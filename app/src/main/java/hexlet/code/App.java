@@ -2,8 +2,13 @@ package hexlet.code;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
+import io.javalin.rendering.template.JavalinJte;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -29,8 +34,7 @@ public class App {
 
     }
 
-    public static Javalin getApp() throws IOException, SQLException {
-
+    private static HikariDataSource getDataBase() throws SQLException, IOException  {
         var hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(System.getenv()
                 .getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;"));
@@ -39,16 +43,28 @@ public class App {
 
         String sql = readResourceFile();
 
-        //log.info(sql);
+        log.info(sql);
         try (var connection = dataSource.getConnection();
              var statement = connection.createStatement()) {
             statement.execute(sql);
         }
-        BaseRepository.dataSource = dataSource;
+        return dataSource;
+    }
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
+    }
+
+    public static Javalin getApp() throws IOException, SQLException {
+
+        BaseRepository.dataSource = getDataBase();
 
         var app = Javalin.create(config -> config.plugins.enableDevLogging());
+        JavalinJte.init(createTemplateEngine());
 
-        app.get("/", ctx -> ctx.result("Hello World"));
+        app.get(NamedRoutes.rootPath(), ctx -> ctx.result("Hello World"));
 
         return app;
     }
