@@ -4,13 +4,14 @@ import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
-import hexlet.code.repository.UrlRepository;
+import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Date;
@@ -43,11 +44,11 @@ public class UrlsController {
 
             Url newUrl = new Url(urlName, createdAt);
 
-            if (UrlRepository.existsByName(urlName)) {
+            if (UrlsRepository.existsByName(urlName)) {
                 ctx.sessionAttribute("flash", "Страница уже существует");
                 ctx.sessionAttribute("flashType", "warning");
             } else {
-                UrlRepository.save(newUrl);
+                UrlsRepository.save(newUrl);
                 ctx.sessionAttribute("flash", "Страница успешно добавлена");
                 ctx.sessionAttribute("flashType", "success");
             }
@@ -62,10 +63,10 @@ public class UrlsController {
         
     }
 
-    public static void index(Context ctx) {
+    public static void index(Context ctx) throws SQLException {
         var flash = ctx.consumeSessionAttribute("flash");
         var flashType = ctx.consumeSessionAttribute("flashType");
-        var page = new UrlsPage(UrlRepository.getEntities());
+        var page = new UrlsPage(UrlsRepository.getEntities());
         if (flash != null && flashType != null) {
             page.setFlash((String)flash);
             page.setFlashType((String)flashType);
@@ -73,9 +74,9 @@ public class UrlsController {
         ctx.render("urls/index.jte", Collections.singletonMap("page", page));
     }
 
-    public static void show(Context ctx) {
+    public static void show(Context ctx) throws SQLException {
         var id = ctx.pathParamAsClass("id", Long.class).get();
-        var url = UrlRepository.find(id)
+        var url = UrlsRepository.find(id)
                 .orElseThrow(() -> new NotFoundResponse("URL not found"));
 
         var page = new UrlPage(url);
