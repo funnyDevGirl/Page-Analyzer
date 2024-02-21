@@ -25,7 +25,7 @@ test:
 	./gradlew test
 
 report:
-	./gradlew jacocoTestReport
+	cd app/ && ./gradlew jacocoTestReport
 
 image-build:
 	docker build -t hexletcomponents/java-javalin-example:latest .
