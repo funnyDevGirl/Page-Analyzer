@@ -24,6 +24,9 @@ lint:
 test:
 	./gradlew test
 
+report:
+	./gradlew jacocoTestReport
+
 image-build:
 	docker build -t hexletcomponents/java-javalin-example:latest .
 
