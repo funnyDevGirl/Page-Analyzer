@@ -60,7 +60,6 @@ public class UrlsController {
             page.setFlashType("error");
             ctx.render("index.jte", Collections.singletonMap("page", page));
         }
-        
     }
 
     public static void index(Context ctx) throws SQLException {
@@ -68,8 +67,8 @@ public class UrlsController {
         var flashType = ctx.consumeSessionAttribute("flashType");
         var page = new UrlsPage(UrlsRepository.getEntities());
         if (flash != null && flashType != null) {
-            page.setFlash((String)flash);
-            page.setFlashType((String)flashType);
+            page.setFlash((String) flash);
+            page.setFlashType((String) flashType);
         }
         ctx.render("urls/index.jte", Collections.singletonMap("page", page));
     }
