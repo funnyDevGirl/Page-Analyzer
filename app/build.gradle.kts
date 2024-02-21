@@ -23,7 +23,6 @@ application {
 
 dependencies {
     implementation("org.apache.commons:commons-text:1.10.0")
-    //implementation("org.apache.commons:commons-collections4:4.4")
     testImplementation(platform("org.junit:junit-bom:5.10.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.25.1")
@@ -38,6 +37,13 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.0.1")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
+    implementation("org.postgresql:postgresql:42.6.0")
+
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    implementation("com.konghq:unirest-java:3.14.5")
+    implementation("org.jsoup:jsoup:1.17.2")
+    testImplementation("org.mockito:mockito-core:5.10.0")
 
 }
 
