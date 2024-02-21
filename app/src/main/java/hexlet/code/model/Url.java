@@ -14,6 +14,7 @@ public final class Url {
 
     @ToString.Include
     private String name;
+
     private Timestamp createdAt;
 
     public Url(String name, Timestamp createdAt) {
