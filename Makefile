@@ -21,6 +21,9 @@ install:
 lint:
 	./gradlew checkstyleMain checkstyleTest
 
+report:
+	cd app/ && ./gradlew jacocoTestReport
+
 test:
 	./gradlew test
 
