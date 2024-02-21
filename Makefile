@@ -21,11 +21,11 @@ install:
 lint:
 	./gradlew checkstyleMain checkstyleTest
 
-report:
-	cd app/ && ./gradlew jacocoTestReport
-
 test:
 	./gradlew test
+
+report:
+	./gradlew jacocoTestReport
 
 image-build:
 	docker build -t hexletcomponents/java-javalin-example:latest .
