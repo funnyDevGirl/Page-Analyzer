@@ -10,9 +10,9 @@ CREATE TABLE urls (
 CREATE TABLE url_checks (
     id BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE NOT NULL,
     url_id BIGINT NOT NULL,
-    statusCode BIGINT,
-    title VARCHAR(255),
+    status_code BIGINT,
     h1 VARCHAR(255),
+    title VARCHAR(255),
     description TEXT,
     created_at TIMESTAMP,
     FOREIGN KEY (url_id) REFERENCES urls (id)
