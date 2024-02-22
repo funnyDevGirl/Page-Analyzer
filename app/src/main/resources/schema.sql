@@ -5,3 +5,14 @@ CREATE TABLE urls (
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL
 );
+
+CREATE TABLE url_checks (
+    id BIGINT GENERATED ALWAYS AS IDENTITY UNIQUE NOT NULL,
+    url_id BIGINT NOT NULL,
+    statusCode BIGINT,
+    title VARCHAR(255),
+    h1 VARCHAR(255),
+    description TEXT,
+    created_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (url_id) REFERENCES urls (id)
+);
