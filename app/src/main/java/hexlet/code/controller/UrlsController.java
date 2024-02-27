@@ -4,6 +4,7 @@ import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
+import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
@@ -74,11 +75,18 @@ public class UrlsController {
     }
 
     public static void show(Context ctx) throws SQLException {
-        var id = ctx.pathParamAsClass("id", Long.class).get();
-        var url = UrlsRepository.find(id)
+        int id = ctx.pathParamAsClass("id", Integer.class).get();
+        var url = UrlsRepository.find((long) id)
                 .orElseThrow(() -> new NotFoundResponse("URL not found"));
 
-        var page = new UrlPage(url);
+        var checks = UrlCheckRepository.getChecksById(id);
+        var flash = ctx.consumeSessionAttribute("flash");
+        var flashType = ctx.consumeSessionAttribute("flashType");
+        var page = new UrlPage(url, checks);
+        if (flash != null && flashType != null) {
+            page.setFlash(flash.toString());
+            page.setFlashType(flashType.toString());
+        }
         ctx.render("urls/show.jte", Collections.singletonMap("page", page));
     }
 }
