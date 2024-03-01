@@ -1,11 +1,11 @@
 @import gg.jte.Content
 @import hexlet.code.util.NamedRoutes
 @import hexlet.code.dto.BasePage
-@param BasePage page = null
+@param BasePage page
 @param Content content
 @param Content footer = null
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
     <head>
@@ -26,7 +26,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <div class="navbar-nav">
                         <a class="nav-link" href="${NamedRoutes.rootPath()}">Главная</a>
-                        <a class="nav-link" href="${NamedRoutes.urlsPath()}"">Сайты</a>
+                        <a class="nav-link" href="${NamedRoutes.urlsPath()}">Сайты</a>
                     </div>
                 </div>
             </div>
