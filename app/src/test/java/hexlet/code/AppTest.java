@@ -25,13 +25,13 @@ import io.javalin.testtools.JavalinTest;
 
 public class AppTest {
     private static Javalin app;
-    private static MockWebServer server;
+    private static MockWebServer mockServer;
 
     @BeforeAll
     public static void beforeAll() throws IOException{
-        server = new MockWebServer();
-        MockResponse response = new MockResponse().setBody(readResourceFile("fixtures/test.html"));
-        server.enqueue(response);
+        mockServer = new MockWebServer();
+        MockResponse mockResponse = new MockResponse().setBody(readResourceFile("fixtures/test.html"));
+        mockServer.enqueue(mockResponse);
     }
 
     @BeforeEach
@@ -41,7 +41,7 @@ public class AppTest {
 
     @AfterAll
     public static void afterAll() throws IOException {
-        server.shutdown();
+        mockServer.shutdown();
     }
 
 
@@ -84,7 +84,7 @@ public class AppTest {
 
     @Test
     void testUrlCheck(){
-        var url = server.url("/").toString();
+        var url = mockServer.url("/").toString();
         Url testUrl = new Url(url);
         UrlsRepository.save(testUrl);
 
