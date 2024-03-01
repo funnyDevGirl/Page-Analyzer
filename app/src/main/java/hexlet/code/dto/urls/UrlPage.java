@@ -5,6 +5,7 @@ import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,4 +16,8 @@ public class UrlPage extends BasePage {
     private Url url;
     private List<UrlCheck> urlChecks = new ArrayList<>();
 
+    public UrlPage(String flash, String flashType, Url url) {
+        super(flash, flashType);
+        this.url = url;
+    }
 }
