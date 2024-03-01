@@ -6,6 +6,7 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controller.RootController;
+import hexlet.code.controller.UrlCheckController;
 import hexlet.code.controller.UrlsController;
 import hexlet.code.repository.BaseRepository;
 import hexlet.code.util.NamedRoutes;
@@ -28,12 +29,12 @@ public class App {
         return Integer.parseInt(port);
     }
 
-    private static String readResourceFile() throws IOException {
-        var inputStream = App.class.getClassLoader().getResourceAsStream("schema.sql");
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+    public static String readResourceFile(String file) throws IOException {
+        var inputStream = App.class.getClassLoader().getResourceAsStream(file);
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return reader.lines().collect(Collectors.joining("\n"));
         }
-
     }
 
     private static HikariDataSource getDataBase() throws SQLException, IOException  {
@@ -43,7 +44,7 @@ public class App {
 
         var dataSource = new HikariDataSource(hikariConfig);
 
-        String sql = readResourceFile();
+        String sql = readResourceFile("schema.sql");
 
         log.info(sql);
         try (var connection = dataSource.getConnection();
@@ -63,13 +64,21 @@ public class App {
 
         BaseRepository.dataSource = getDataBase();
 
-        var app = Javalin.create(config -> config.plugins.enableDevLogging());
+        var app = Javalin.create(config ->
+                config.plugins.enableDevLogging());
         JavalinJte.init(createTemplateEngine());
 
         app.get(NamedRoutes.rootPath(), RootController::index);
-        app.post(NamedRoutes.urlsPath(), UrlsController::create);
         app.get(NamedRoutes.urlsPath(), UrlsController::index);
+        app.post(NamedRoutes.urlsPath(), UrlsController::create);
         app.get(NamedRoutes.urlPath("{id}"), UrlsController::show);
+        app.post(NamedRoutes.urlChecksPath("{id}"), UrlCheckController::createCheck);
+        app.get(NamedRoutes.urlChecksPath("{id}"), UrlsController::show);
+
+        app.exception(Exception.class, (endpoint, ctx) -> {
+            ctx.status(404);
+            ctx.render("errors/404.jte");
+        });
 
         return app;
     }
