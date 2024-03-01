@@ -8,44 +8,35 @@ import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
-import io.javalin.http.NotFoundResponse;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Collections;
-import java.util.Date;
 
 
 public class UrlsController {
+    public static void create(Context ctx) {
 
-    private static String normalizeUrl(String scheme, String authority) {
-        return String.format("%s://%s", scheme, authority);
-    }
+        //var url = ctx.formParamAsClass("name", String.class).get();
+        var url = ctx.formParamAsClass("url", String.class).get();
 
-    private static String normalizeUrl(String scheme, String authority, String port) {
-        if (port == null) {
-            return normalizeUrl(scheme, authority);
-        }
-        return String.format("%s://%s:%s", scheme, authority, port);
-    }
-
-    public static void create(Context ctx) throws URISyntaxException {
-
-        var url = ctx.formParamAsClass("name", String.class).get();
-        URI uri = new URI(url);
         try {
-            String scheme = uri.getScheme();
-            String authority = uri.getAuthority();
-            String port = uri.getHost();
+            URI uri = new URI(url);
 
-            String urlName = normalizeUrl(scheme, authority, port);
-            Timestamp createdAt = new Timestamp(new Date().getTime());
+            String urlName = String
+                .format(
+                        "%s://%s%s",
+                        uri.getScheme(),
+                        uri.getHost(),
+                        uri.getPort() < 0 || uri.getPort() > 65535 ? "" : ":" + uri.getPort()
+                )
+                .toLowerCase();
 
-            Url newUrl = new Url(urlName, createdAt);
+            Url newUrl = new Url(urlName);
 
-            if (UrlsRepository.existsByName(urlName)) {
+            //Timestamp createdAt = new Timestamp(new Date().getTime());
+            //Url newUrl = new Url(urlName, createdAt);
+
+            if (UrlsRepository.find(newUrl.getName()).isPresent()) {
                 ctx.sessionAttribute("flash", "Страница уже существует");
                 ctx.sessionAttribute("flashType", "warning");
             } else {
@@ -56,36 +47,38 @@ public class UrlsController {
             ctx.redirect(NamedRoutes.urlsPath());
 
         } catch (Exception e) {
-            var page = new BasePage();
-            page.setFlash("Некорректный URL");
-            page.setFlashType("error");
+            var page = new BasePage("Некорректный URL", "error");
             ctx.render("index.jte", Collections.singletonMap("page", page));
         }
     }
 
-    public static void index(Context ctx) throws SQLException {
+    public static void index(Context ctx) {
         var flash = ctx.consumeSessionAttribute("flash");
         var flashType = ctx.consumeSessionAttribute("flashType");
         var page = new UrlsPage(UrlsRepository.getEntities());
+
         if (flash != null && flashType != null) {
-            page.setFlash((String) flash);
-            page.setFlashType((String) flashType);
+            page.setFlash(String.valueOf(flash));
+            page.setFlashType(String.valueOf(flashType));
         }
         ctx.render("urls/index.jte", Collections.singletonMap("page", page));
     }
 
-    public static void show(Context ctx) throws SQLException {
+    public static void show(Context ctx) {
         int id = ctx.pathParamAsClass("id", Integer.class).get();
-        var url = UrlsRepository.find((long) id)
-                .orElseThrow(() -> new NotFoundResponse("URL not found"));
+
+//        var url = UrlsRepository.find(id)
+//                .orElseThrow(() -> new NotFoundResponse("URL not found"));
+
+        var url = UrlsRepository.find(id).isPresent() ? UrlsRepository.find(id).get() : null;
 
         var checks = UrlCheckRepository.getChecksById(id);
         var flash = ctx.consumeSessionAttribute("flash");
         var flashType = ctx.consumeSessionAttribute("flashType");
         var page = new UrlPage(url, checks);
         if (flash != null && flashType != null) {
-            page.setFlash(flash.toString());
-            page.setFlashType(flashType.toString());
+            page.setFlash(String.valueOf(flash));
+            page.setFlashType(String.valueOf(flashType));
         }
         ctx.render("urls/show.jte", Collections.singletonMap("page", page));
     }
