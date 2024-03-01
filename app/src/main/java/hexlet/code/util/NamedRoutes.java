@@ -9,18 +9,18 @@ public class NamedRoutes {
         return "/urls";
     }
 
-    public static String urlPath(Long id) {
+    public static String urlPath(int id) {
         return urlPath(String.valueOf(id));
     }
 
     public static String urlPath(String id) {
         return "/urls/" + id;
     }
-    public static String urlChecksPath(Long urlId) {
+    public static String urlChecksPath(int urlId) {
         return urlChecksPath(String.valueOf(urlId));
     }
 
     public static String urlChecksPath(String urlId) {
-        return "urls/" + urlId + "/checks";
+        return "/urls/" + urlId + "/checks";
     }
 }
