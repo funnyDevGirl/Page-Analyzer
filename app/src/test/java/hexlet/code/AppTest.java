@@ -2,6 +2,8 @@ package hexlet.code;
 
 import static hexlet.code.App.readResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -48,7 +50,7 @@ public class AppTest {
     @Test
     public void testMainPage() {
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/");
+            var response = client.get(NamedRoutes.rootPath());
             assertThat(response.code()).isEqualTo(200);
             assertThat(response.body().string()).contains("Анализатор страниц");
         });
@@ -57,31 +59,66 @@ public class AppTest {
     @Test
     public void testUrlsPage() {
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls");
+            var response = client.get(NamedRoutes.urlsPath());
             assertThat(response.code()).isEqualTo(200);
         });
     }
 
     @Test
-    public void testUrlPage(){
-        var url = new Url("https://www.mail.ru", new Timestamp(new Date().getTime()));
+    public void testUrlPage() {
+        String input = "https://www.mail.ru";
+        var url = new Url(input, new Timestamp(new Date().getTime()));
         UrlsRepository.save(url);
 
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/" + url.getId());
+            assertTrue(UrlsRepository.find(url.getId()).isPresent());
+
+            var response = client.get(NamedRoutes.urlPath(url.getId()));
+
             assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body().string()).contains("https://www.mail.ru");
+            assertThat(response.body().string()).contains(input);
+            assertEquals(UrlsRepository.find(url.getId()).get().getName(), input);
+            assertEquals(UrlsRepository.find(input).get().getName(), input);
         });
     }
 
     @Test
-    void testUrlNotFound() {
+    public void testDoubleUrlPage() {
+        String input = "url=https://www.mail.ru";
+
         JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/999999");
+            client.post(NamedRoutes.urlsPath(), input);
+            client.post(NamedRoutes.urlsPath(), input);
+            assertThat(UrlsRepository.getEntities()).hasSize(1);
+        });
+    }
+
+    //этот доработаю ещё)
+    /*@Test
+    public void testUncorrectUrl() {
+        String input = "url=lalala.ru";
+        JavalinTest.test(app, (server, client) -> {
+            var response = client.post(NamedRoutes.urlsPath(), input);
+            //var response = client.get(NamedRoutes.urlsPath());
+            assertThat(response.code()).isEqualTo(400);
+            //assertThat(response.body().string()).contains("null://null");
+
+            //client.post(NamedRoutes.urlChecksPath())
+            assertThat(response.body() != null ? response.body().string() : null).contains("Некорректный URL");
+        });
+    }*/
+
+    //java.net.SocketTimeoutException: timeout
+    @Test
+    void testUrlNotFound() {
+        var id = 9999;
+        JavalinTest.test(app, (server, client) -> {
+            var response = client.get(NamedRoutes.urlPath(id));
             assertThat(response.code()).isEqualTo(404);
         });
     }
 
+    //приходит код 400 вместо 200
     @Test
     void testUrlCheck(){
         var url = mockServer.url("/").toString();
@@ -89,9 +126,9 @@ public class AppTest {
         UrlsRepository.save(testUrl);
 
         JavalinTest.test(app, (server, client) -> {
-            try (var response = client.post(NamedRoutes.urlChecksPath(testUrl.getId()))) {
-                assertThat(response.code()).isEqualTo(200);
-            }
+            var response = client.post(NamedRoutes.urlChecksPath(testUrl.getId()));
+            assertThat(response.code()).isEqualTo(200);
+
             var check = UrlCheckRepository.find(testUrl.getId()).orElseThrow();
 
             assertThat(check.getTitle()).isEqualTo("Test Title");
