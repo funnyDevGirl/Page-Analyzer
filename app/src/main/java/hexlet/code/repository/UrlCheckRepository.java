@@ -4,7 +4,9 @@ import hexlet.code.model.UrlCheck;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,8 +24,11 @@ public class UrlCheckRepository {
             preparedStatement.setString(3, urlCheck.getTitle());
             preparedStatement.setString(4, urlCheck.getH1());
             preparedStatement.setString(5, urlCheck.getDescription());
-            preparedStatement.setTimestamp(6, urlCheck.getCreatedAt());
+            var createdAt = new Timestamp(new Date().getTime());
+            preparedStatement.setTimestamp(6, createdAt);
+
             preparedStatement.executeUpdate();
+            urlCheck.setCreatedAt(createdAt);
 
             var generatedKey = preparedStatement.getGeneratedKeys();
 
@@ -39,6 +44,7 @@ public class UrlCheckRepository {
 
     public static Optional<UrlCheck> find(int id) {
         String sql = "SELECT * FROM url_checks WHERE url_id = ?";
+        //String sql = "SELECT * FROM url_checks WHERE id = ?";
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
@@ -50,8 +56,12 @@ public class UrlCheckRepository {
                 var h1 = resultSet.getString("h1");
                 var description = resultSet.getString("description");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description, createdAt);
-                urlCheck.setId(id);
+
+                //var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description, createdAt);
+                //urlCheck.setId(id);
+
+                var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description);
+                urlCheck.setCreatedAt(createdAt);
 
                 return Optional.of(urlCheck);
             }
@@ -75,7 +85,12 @@ public class UrlCheckRepository {
                 var h1 = resultSet.getString("h1");
                 var description = resultSet.getString("description");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var urlCheck = new UrlCheck(id, urlId, statusCode, title, h1, description, createdAt);
+
+                //var urlCheck = new UrlCheck(id, urlId, statusCode, title, h1, description, createdAt);
+
+                var urlCheck = new UrlCheck(id, urlId, statusCode, title, h1, description);
+                urlCheck.setCreatedAt(createdAt);
+
                 result.add(urlCheck);
             }
             return result;
