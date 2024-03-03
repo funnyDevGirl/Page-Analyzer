@@ -16,6 +16,7 @@ import hexlet.code.repository.UrlsRepository;
 import hexlet.code.model.Url;
 import hexlet.code.util.NamedRoutes;
 
+import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -90,15 +91,25 @@ public class AppTest {
 
     @Test
     void testRegisterNewUrl() {
-        String input = "url=https://www.mail.ru";
+        String input1 = "url=https://www.mail.ru";
+        String input2 = "url=https://ru.hexlet.io";
 
         JavalinTest.test(app, (server, client) -> {
-            try (var response = client.post(NamedRoutes.urlsPath(), input)) {
-                assertThat(response.code()).isEqualTo(200);
-                assertThat(Objects.requireNonNull(response.body()).string()).
-                        contains("https://www.mail.ru");
-            }
-            assertThat(UrlsRepository.getEntities()).hasSize(1);
+            client.post(NamedRoutes.urlsPath(), input1);
+            client.post(NamedRoutes.urlsPath(), input2);
+            var response = client.get(NamedRoutes.urlsPath());
+            var bodyString = Objects.requireNonNull(response.body()).string();
+            assertThat(response.code()).isEqualTo(200);
+            assertThat(UrlsRepository.getEntities()).hasSize(2);
+
+            assertTrue(UrlsRepository.find("https://ru.hexlet.io").isPresent());
+            assertEquals("https://ru.hexlet.io",
+                    UrlsRepository.find("https://ru.hexlet.io").get().getName());
+            assertTrue(UrlsRepository.find("https://www.mail.ru").isPresent());
+            assertEquals("https://www.mail.ru",
+                    UrlsRepository.find("https://www.mail.ru").get().getName());
+            assertThat(bodyString).contains("https://www.mail.ru");
+            assertThat(bodyString).contains("https://ru.hexlet.io");
         });
     }
 
