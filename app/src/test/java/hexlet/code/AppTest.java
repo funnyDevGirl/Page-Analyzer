@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.model.Url;
 import hexlet.code.util.NamedRoutes;
+import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -28,10 +30,12 @@ import io.javalin.testtools.JavalinTest;
 public class AppTest {
     private static Javalin app;
     private static MockWebServer mockServer;
+    private static String baseUrl;
 
     @BeforeAll
     public static void beforeAll() throws IOException{
         mockServer = new MockWebServer();
+        baseUrl = mockServer.url("/").toString();
         MockResponse mockResponse = new MockResponse().setBody(readResourceFile("fixtures/test.html"));
         mockServer.enqueue(mockResponse);
     }
@@ -64,10 +68,12 @@ public class AppTest {
         });
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void testUrlPage() {
         String input = "https://www.mail.ru";
-        var url = new Url(input, new Timestamp(new Date().getTime()));
+        var url = new Url(input);
+        url.setCreatedAt(new Timestamp(new Date().getTime()));
         UrlsRepository.save(url);
 
         JavalinTest.test(app, (server, client) -> {
@@ -76,9 +82,23 @@ public class AppTest {
             var response = client.get(NamedRoutes.urlPath(url.getId()));
 
             assertThat(response.code()).isEqualTo(200);
-            assertThat(response.body().string()).contains(input);
+            assertThat(Objects.requireNonNull(response.body()).string()).contains(input);
             assertEquals(UrlsRepository.find(url.getId()).get().getName(), input);
             assertEquals(UrlsRepository.find(input).get().getName(), input);
+        });
+    }
+
+    @Test
+    void testRegisterNewUrl() {
+        String input = "url=https://www.mail.ru";
+
+        JavalinTest.test(app, (server, client) -> {
+            try (var response = client.post(NamedRoutes.urlsPath(), input)) {
+                assertThat(response.code()).isEqualTo(200);
+                assertThat(Objects.requireNonNull(response.body()).string()).
+                        contains("https://www.mail.ru");
+            }
+            assertThat(UrlsRepository.getEntities()).hasSize(1);
         });
     }
 
@@ -93,25 +113,22 @@ public class AppTest {
         });
     }
 
-    //этот доработаю ещё)
-    /*@Test
-    public void testUncorrectUrl() {
+    @Test
+    public void testInvalidUrl() {
         String input = "url=lalala.ru";
+
         JavalinTest.test(app, (server, client) -> {
-            var response = client.post(NamedRoutes.urlsPath(), input);
-            //var response = client.get(NamedRoutes.urlsPath());
-            assertThat(response.code()).isEqualTo(400);
-            //assertThat(response.body().string()).contains("null://null");
-
-            //client.post(NamedRoutes.urlChecksPath())
-            assertThat(response.body() != null ? response.body().string() : null).contains("Некорректный URL");
+            try (var response = client.post(NamedRoutes.urlsPath(), input)) {
+                assertThat(response.code()).isEqualTo(400);
+                assertThat(response.body() != null ? response.body().string() : null).contains("Некорректный URL");
+            }
         });
-    }*/
+    }
 
-    //java.net.SocketTimeoutException: timeout
     @Test
     void testUrlNotFound() {
         var id = 9999;
+
         JavalinTest.test(app, (server, client) -> {
             var response = client.get(NamedRoutes.urlPath(id));
             assertThat(response.code()).isEqualTo(404);
@@ -121,15 +138,16 @@ public class AppTest {
     //приходит код 400 вместо 200
     @Test
     void testUrlCheck(){
-        var url = mockServer.url("/").toString();
-        Url testUrl = new Url(url);
-        UrlsRepository.save(testUrl);
+
+        Url url = new Url(baseUrl);
+        UrlsRepository.save(url);
 
         JavalinTest.test(app, (server, client) -> {
-            var response = client.post(NamedRoutes.urlChecksPath(testUrl.getId()));
-            assertThat(response.code()).isEqualTo(200);
+            try (var response = client.post(NamedRoutes.urlChecksPath(url.getId()))) {
+                assertThat(response.code()).isEqualTo(200);
+            }
 
-            var check = UrlCheckRepository.find(testUrl.getId()).orElseThrow();
+            var check = UrlCheckRepository.find(url.getId()).orElseThrow();
 
             assertThat(check.getTitle()).isEqualTo("Test Title");
             assertThat(check.getH1()).isEqualTo("Test Page Analyzer");
