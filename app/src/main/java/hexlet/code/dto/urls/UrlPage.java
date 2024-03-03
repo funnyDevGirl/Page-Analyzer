@@ -14,10 +14,5 @@ import java.util.List;
 @Getter
 public class UrlPage extends BasePage {
     private Url url;
-    private List<UrlCheck> urlChecks = new ArrayList<>();
-
-    public UrlPage(String flash, String flashType, Url url) {
-        super(flash, flashType);
-        this.url = url;
-    }
+    private List<UrlCheck> urlChecks;
 }

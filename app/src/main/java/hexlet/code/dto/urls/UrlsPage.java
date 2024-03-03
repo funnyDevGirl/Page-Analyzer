@@ -15,4 +15,5 @@ import java.util.List;
 @Setter
 public class UrlsPage extends BasePage {
     private List<Url> urls;
+
 }
