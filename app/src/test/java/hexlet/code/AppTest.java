@@ -16,7 +16,6 @@ import hexlet.code.repository.UrlsRepository;
 import hexlet.code.model.Url;
 import hexlet.code.util.NamedRoutes;
 
-import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
