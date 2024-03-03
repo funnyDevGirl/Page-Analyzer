@@ -19,7 +19,6 @@ public class UrlCheckController {
         long urlId = ctx.formParamAsClass("id", Long.class).get();
 
         //получаю из бд сохранённый урл:
-        //var url = UrlsRepository.find(urlId).get();
         String urlName;
         if (UrlsRepository.find(urlId).isPresent()) {
             urlName = UrlsRepository.find(urlId).get().getName();
