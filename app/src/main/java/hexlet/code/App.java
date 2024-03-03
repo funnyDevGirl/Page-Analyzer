@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,10 +31,11 @@ public class App {
     }
 
     public static String readResourceFile(String file) throws IOException {
-        var inputStream = App.class.getClassLoader().getResourceAsStream(file);
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
+        try (var inputStream = App.class.getClassLoader().getResourceAsStream(file)) {
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8))) {
+                return reader.lines().collect(Collectors.joining("\n"));
+            }
         }
     }
 
@@ -77,7 +79,7 @@ public class App {
 
         app.exception(Exception.class, (endpoint, ctx) -> {
             ctx.status(404);
-            ctx.render("errors/404.jte");
+            //ctx.render("errors/404.jte");
         });
 
         return app;
