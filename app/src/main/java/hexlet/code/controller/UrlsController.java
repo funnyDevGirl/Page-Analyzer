@@ -4,13 +4,16 @@ import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
+import io.javalin.http.NotFoundResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -18,7 +21,7 @@ import java.util.Objects;
 public class UrlsController {
     public static void create(Context ctx) throws URISyntaxException {
 
-        var url = ctx.formParamAsClass("url", String.class).get();
+        var url = ctx.formParamAsClass("url", String.class).get().trim();
         var uri = new URI(url);
 
         try {
@@ -77,8 +80,15 @@ public class UrlsController {
 
         long id = ctx.pathParamAsClass("id", Long.class).get();
 
-        var url = UrlsRepository.find(id).isPresent() ? UrlsRepository.find(id).get() : null;
-        var checks = UrlCheckRepository.getChecksById(id);
+        //var url = UrlsRepository.find(id).isPresent() ? UrlsRepository.find(id).get() : null;
+
+        var url = UrlsRepository.find(id)
+                .orElseThrow(() -> new NotFoundResponse("Url with id = " + id + " not found"));
+
+        //var checks = UrlCheckRepository.getChecksById(id);
+
+        var checks = !UrlCheckRepository.getChecksById(id).isEmpty()
+                ? UrlCheckRepository.getChecksById(id) : new ArrayList<UrlCheck>();
 
         var page = new UrlPage(url, checks);
 
