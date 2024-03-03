@@ -33,7 +33,7 @@ public class AppTest {
     private static String baseUrl;
 
     @BeforeAll
-    public static void beforeAll() throws IOException{
+    public static void beforeAll() throws IOException {
         mockServer = new MockWebServer();
         baseUrl = mockServer.url("/").toString();
         MockResponse mockResponse = new MockResponse().setBody(readResourceFile("fixtures/test.html"));
@@ -135,9 +135,8 @@ public class AppTest {
         });
     }
 
-    //приходит код 400 вместо 200
     @Test
-    void testUrlCheck(){
+    void testUrlCheck() {
 
         Url url = new Url(baseUrl);
         UrlsRepository.save(url);
