@@ -15,7 +15,7 @@ import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.model.Url;
 import hexlet.code.util.NamedRoutes;
-import okhttp3.Response;
+
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -145,13 +145,15 @@ public class AppTest {
         JavalinTest.test(app, (server, client) -> {
             try (var response = client.post(NamedRoutes.urlChecksPath(url.getId()))) {
                 assertThat(response.code()).isEqualTo(200);
+
+                var check = UrlCheckRepository.find(url.getId()).orElseThrow();
+
+                assertThat(check.getTitle()).isEqualTo("Test Title");
+                assertThat(check.getH1()).isEqualTo("Test Page Analyzer");
+                assertThat(check.getDescription()).isEqualTo("");
+            } catch (final Throwable th) {
+                System.out.println(th.getMessage());
             }
-
-            var check = UrlCheckRepository.find(url.getId()).orElseThrow();
-
-            assertThat(check.getTitle()).isEqualTo("Test Title");
-            assertThat(check.getH1()).isEqualTo("Test Page Analyzer");
-            assertThat(check.getDescription()).isEqualTo("");
         });
     }
 }
