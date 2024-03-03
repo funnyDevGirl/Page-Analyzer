@@ -10,75 +10,86 @@ import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Objects;
 
 
 public class UrlsController {
-    public static void create(Context ctx) {
+    public static void create(Context ctx) throws URISyntaxException {
 
-        //var url = ctx.formParamAsClass("name", String.class).get();
         var url = ctx.formParamAsClass("url", String.class).get();
+        var uri = new URI(url);
 
         try {
-            URI uri = new URI(url);
+            if (Objects.equals(uri.getScheme(), null) || Objects.equals(uri.getHost(), null)) {
+                throw new URISyntaxException(uri.toString(), "Некорректный URL");
+            }
+        } catch (URISyntaxException e) {
+            var page = new BasePage("Некорректный URL", "error");
+            ctx.status(400);
+            ctx.render("index.jte", Collections.singletonMap("page", page));
 
-            String urlName = String
-                .format(
-                        "%s://%s%s",
+            //прерываю метод, чтобы не сохранялся "null://null":
+            return;
+        }
+
+        String urlName = String.
+                format("%s://%s%s",
                         uri.getScheme(),
                         uri.getHost(),
                         uri.getPort() < 0 || uri.getPort() > 65535 ? "" : ":" + uri.getPort()
-                )
-                .toLowerCase();
+                ).toLowerCase();
 
-            Url newUrl = new Url(urlName);
+        Url newUrl = new Url(urlName);
 
-            //Timestamp createdAt = new Timestamp(new Date().getTime());
-            //Url newUrl = new Url(urlName, createdAt);
+        if (UrlsRepository.find(newUrl.getName()).isPresent()) {
+            //сохраняю флеш-сообщение:
+            ctx.sessionAttribute("flash", "Страница уже существует");
+            ctx.sessionAttribute("flashType", "warning");
+        } else {
+            UrlsRepository.save(newUrl);
 
-            if (UrlsRepository.find(newUrl.getName()).isPresent()) {
-                ctx.sessionAttribute("flash", "Страница уже существует");
-                ctx.sessionAttribute("flashType", "warning");
-            } else {
-                UrlsRepository.save(newUrl);
-                ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                ctx.sessionAttribute("flashType", "success");
-            }
-            ctx.redirect(NamedRoutes.urlsPath());
-
-        } catch (Exception e) {
-            var page = new BasePage("Некорректный URL", "error");
-            ctx.render("index.jte", Collections.singletonMap("page", page));
+            //сохраняю флеш-сообщение:
+            ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            ctx.sessionAttribute("flashType", "success");
         }
+        ctx.redirect(NamedRoutes.urlsPath());
     }
 
     public static void index(Context ctx) {
+
+        //читаю флеш-сообщение из сессии по ключу:
         var flash = ctx.consumeSessionAttribute("flash");
         var flashType = ctx.consumeSessionAttribute("flashType");
+
         var page = new UrlsPage(UrlsRepository.getEntities());
 
+        //если оно есть, вывожу на странице:
         if (flash != null && flashType != null) {
-            page.setFlash(String.valueOf(flash));
-            page.setFlashType(String.valueOf(flashType));
+            page.setFlash((String) flash);
+            page.setFlashType((String) flashType);
         }
         ctx.render("urls/index.jte", Collections.singletonMap("page", page));
     }
 
     public static void show(Context ctx) {
-        int id = ctx.pathParamAsClass("id", Integer.class).get();
 
-//        var url = UrlsRepository.find(id)
-//                .orElseThrow(() -> new NotFoundResponse("URL not found"));
+        long id = ctx.pathParamAsClass("id", Long.class).get();
 
         var url = UrlsRepository.find(id).isPresent() ? UrlsRepository.find(id).get() : null;
-
         var checks = UrlCheckRepository.getChecksById(id);
+
+        var page = new UrlPage(url, checks);
+
+        //читаю флеш-сообщение из сессии:
         var flash = ctx.consumeSessionAttribute("flash");
         var flashType = ctx.consumeSessionAttribute("flashType");
-        var page = new UrlPage(url, checks);
+
+        //если оно есть, вывожу на странице:
         if (flash != null && flashType != null) {
-            page.setFlash(String.valueOf(flash));
-            page.setFlashType(String.valueOf(flashType));
+            page.setFlash((String) flash);
+            page.setFlashType((String) flashType);
         }
         ctx.render("urls/show.jte", Collections.singletonMap("page", page));
     }

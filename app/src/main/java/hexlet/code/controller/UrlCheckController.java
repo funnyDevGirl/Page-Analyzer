@@ -18,12 +18,21 @@ import java.util.Date;
 
 public class UrlCheckController {
     public static void createCheck(Context ctx) throws SQLException {
-        int urlId = ctx.formParamAsClass("id", Integer.class).get();
-        //var url = UrlsRepository.find(urlId).orElseThrow(() -> new NotFoundResponse("Url not found"));
-        var url = UrlsRepository.find(urlId).get();
+        long urlId = ctx.formParamAsClass("id", Long.class).get();
+
+        //получаю из бд сохранённый урл:
+        //var url = UrlsRepository.find(urlId).get();
+        String urlName;
+        if (UrlsRepository.find(urlId).isPresent()) {
+            urlName = UrlsRepository.find(urlId).get().getName();
+        } else {
+            throw (new SQLException("No such mane in DB"));
+        }
 
         try {
-            HttpResponse<String> response = Unirest.get(url.getName()).asString();
+            //дергаю страницу по url:
+            HttpResponse<String> response = Unirest.get(urlName).asString();
+            //парсинг содержимого:
             Document doc = Jsoup.parse(response.getBody());
 
             int statusCode = response.getStatus();
@@ -31,15 +40,13 @@ public class UrlCheckController {
             String h1 = doc.select("h1").text();
             String description = doc.select("meta[name=description]").attr("content");
 
-            //Timestamp createdAt = new Timestamp(new Date().getTime());
-            //var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description, createdAt);
-
             var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description);
             UrlCheckRepository.save(urlCheck);
 
             ctx.sessionAttribute("flash", "Страница успешно проверена");
             ctx.sessionAttribute("flashType", "success");
             ctx.redirect(NamedRoutes.urlPath(urlId));
+
         } catch (Exception e) {
             ctx.sessionAttribute("flash", "Некорректный адрес");
             ctx.sessionAttribute("flashType", "danger");
