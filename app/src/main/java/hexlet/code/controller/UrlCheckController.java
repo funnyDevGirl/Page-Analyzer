@@ -5,16 +5,14 @@ import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
-import io.javalin.http.NotFoundResponse;
+
 import kong.unirest.Unirest;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Date;
+
 
 public class UrlCheckController {
     public static void createCheck(Context ctx) throws SQLException {
