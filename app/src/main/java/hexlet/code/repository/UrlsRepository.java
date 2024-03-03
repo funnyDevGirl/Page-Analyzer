@@ -5,6 +5,7 @@ import hexlet.code.model.Url;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,15 +15,19 @@ public class UrlsRepository extends BaseRepository {
     public static void save(Url url) {
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (var conn = dataSource.getConnection();
-             var preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, url.getName());
-            preparedStatement.setTimestamp(2, new Timestamp(new Date().getTime()));
-            preparedStatement.executeUpdate();
+             var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, url.getName());
+            //var createdAt = new Timestamp(new Date().getTime());
+            var createdAt = Timestamp.valueOf(LocalDateTime.now());
 
-            var generatedKey = preparedStatement.getGeneratedKeys();
+            stmt.setTimestamp(2, createdAt);
+            stmt.executeUpdate();
+
+            var generatedKey = stmt.getGeneratedKeys();
 
             if (generatedKey.next()) {
-                url.setId(generatedKey.getInt(1));
+                url.setId(generatedKey.getLong(1));
+                url.setCreatedAt(createdAt);
             } else {
                 throw new SQLException("DB have not returned an id after saving an entity");
             }
@@ -31,20 +36,21 @@ public class UrlsRepository extends BaseRepository {
         }
     }
 
-    public static Optional<Url> find(int id) {
+    public static Optional<Url> find(long id) {
         String sql = "SELECT * FROM urls WHERE id = ?";
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
+            stmt.setLong(1, id);
             var resultSet = stmt.executeQuery();
+
             if (resultSet.next()) {
                 var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at");
 
-                //var url = new Url(name, createdAt);
-                //url.setId(id);
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
 
-                var url = new Url(id, name, createdAt);
                 return Optional.of(url);
             }
             return Optional.empty();
@@ -59,12 +65,16 @@ public class UrlsRepository extends BaseRepository {
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
             var resultSet = stmt.executeQuery();
+
             if (resultSet.next()) {
-                var id = resultSet.getInt("id");
-                var nameResult = resultSet.getString("name");
+                var id = resultSet.getLong("id");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var course = new Url(id, nameResult, createdAt);
-                return Optional.of(course);
+
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
+
+                return Optional.of(url);
             }
             return Optional.empty();
         } catch (SQLException e) {
@@ -77,16 +87,22 @@ public class UrlsRepository extends BaseRepository {
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             var resultSet = stmt.executeQuery();
-            var result = new ArrayList<Url>();
+
+            List<Url> result = new ArrayList<>();
+
             while (resultSet.next()) {
-                var id = resultSet.getInt("id");
+                var id = resultSet.getLong("id");
                 var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at");
 
-                //var url = new Url(name, createdAt);
-                //url.setId(id);
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
 
-                var url = new Url(id, name, createdAt);
+//                если в классе Url будет ещё List<UrlCheck> urlChecks
+//                List<UrlCheck> urlChecks = UrlChecksRepository.findByUrlId(id);
+//                url.setChecks(urlChecks);
+
                 result.add(url);
             }
             return result;
