@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,10 +97,6 @@ public class UrlsRepository extends BaseRepository {
                 var url = new Url(name);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
-
-//                если в классе Url будет ещё List<UrlCheck> urlChecks
-//                List<UrlCheck> urlChecks = UrlChecksRepository.findByUrlId(id);
-//                url.setChecks(urlChecks);
 
                 result.add(url);
             }

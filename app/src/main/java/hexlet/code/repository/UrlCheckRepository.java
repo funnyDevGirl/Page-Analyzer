@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +14,8 @@ import static hexlet.code.repository.BaseRepository.dataSource;
 
 public class UrlCheckRepository {
     public static void save(UrlCheck urlCheck) {
-        String sql = "INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
