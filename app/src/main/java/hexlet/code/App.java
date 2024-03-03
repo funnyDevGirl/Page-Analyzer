@@ -79,7 +79,6 @@ public class App {
 
         app.exception(Exception.class, (endpoint, ctx) -> {
             ctx.status(404);
-            //ctx.render("errors/404.jte");
         });
 
         return app;
