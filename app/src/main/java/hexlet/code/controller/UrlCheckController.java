@@ -12,11 +12,12 @@ import org.jsoup.nodes.Document;
 import kong.unirest.HttpResponse;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 
 public class UrlCheckController {
     public static void createCheck(Context ctx) throws SQLException {
-        long urlId = ctx.formParamAsClass("id", Long.class).get();
+        long urlId = ctx.pathParamAsClass("id", Long.class).getOrDefault(null);
 
         //получаю из бд сохранённый урл:
         String urlName;
@@ -34,20 +35,27 @@ public class UrlCheckController {
 
             int statusCode = response.getStatus();
             String title = doc.title();
-            String h1 = doc.select("h1").text();
-            String description = doc.select("meta[name=description]").attr("content");
+            //String h1 = doc.select("h1").text();
+            String h1 = Objects.requireNonNull(doc.selectFirst("h1"))
+                    .getElementsByTag("h1").isEmpty()
+                    ? "" : Objects.requireNonNull(doc.selectFirst("h1"))
+                    .getElementsByTag("h1").html();
+            //String description = doc.select("meta[name=description]").attr("content");
+            String description = doc.getElementsByAttributeValue("name", "description").isEmpty() ? "" :
+                    doc.getElementsByAttributeValue("name", "description").get(0).attr("content");
 
             var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description);
             UrlCheckRepository.save(urlCheck);
 
             ctx.sessionAttribute("flash", "Страница успешно проверена");
             ctx.sessionAttribute("flashType", "success");
-            ctx.redirect(NamedRoutes.urlPath(urlId));
+            //ctx.redirect(NamedRoutes.urlPath(urlId));
 
         } catch (Exception e) {
             ctx.sessionAttribute("flash", "Некорректный адрес");
             ctx.sessionAttribute("flashType", "danger");
-            ctx.redirect(NamedRoutes.urlPath(urlId));
+            //Lctx.redirect(NamedRoutes.urlPath(urlId));
         }
+        ctx.redirect(NamedRoutes.urlPath(urlId));
     }
 }
