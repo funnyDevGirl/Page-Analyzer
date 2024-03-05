@@ -12,8 +12,6 @@ import org.jsoup.nodes.Document;
 import kong.unirest.HttpResponse;
 
 import java.sql.SQLException;
-import java.util.Objects;
-
 
 public class UrlCheckController {
     public static void createCheck(Context ctx) throws SQLException {
@@ -36,13 +34,7 @@ public class UrlCheckController {
             int statusCode = response.getStatus();
             String title = doc.title();
             String h1 = doc.select("h1").text();
-//            String h1 = Objects.requireNonNull(doc.selectFirst("h1"))
-//                    .getElementsByTag("h1").isEmpty()
-//                    ? "" : Objects.requireNonNull(doc.selectFirst("h1"))
-//                    .getElementsByTag("h1").html();
             String description = doc.select("meta[name=description]").attr("content");
-//            String description = doc.getElementsByAttributeValue("name", "description").isEmpty() ? "" :
-//                    doc.getElementsByAttributeValue("name", "description").get(0).attr("content");
 
             var urlCheck = new UrlCheck(urlId, statusCode, title, h1, description);
             UrlCheckRepository.save(urlCheck);
