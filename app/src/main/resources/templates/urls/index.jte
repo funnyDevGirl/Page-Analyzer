@@ -6,6 +6,7 @@
 
 @template.layout.page(page = page,
     content = @`
+
         <div class="container-lg mt-5">
             <h1>Сайты</h1>
 
@@ -29,19 +30,16 @@
                             <a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a>
                         </td>
                         <td>
-                            @if(UrlCheckRepository.find(url.getId()).isPresent())
-                                ${UrlCheckRepository.getChecksById(url.getId())
-                                   .get(UrlCheckRepository.getChecksById(url.getId()).size() - 1)
-                                   .getCreatedAt().toLocalDateTime()
-                                   .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}
-                            @endif
+                            !{var checks = UrlCheckRepository.getChecksById(url.getId());}
+                            ${!checks.isEmpty() ?
+                                    checks.get(checks.size() - 1)
+                                    .getCreatedAt().toLocalDateTime()
+                                   .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : ""}
                         </td>
                         <td>
-                            @if(UrlCheckRepository.find(url.getId()).isPresent())
-                                ${UrlCheckRepository.getChecksById(url.getId())
-                                   .get(UrlCheckRepository.getChecksById(url.getId()).size() - 1)
-                                   .getStatusCode()}
-                            @endif
+                            ${!checks.isEmpty() ?
+                                    checks.get(checks.size() - 1)
+                                    .getStatusCode() : null}
                         </td>
                     </tr>
                 @endfor

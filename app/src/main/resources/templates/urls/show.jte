@@ -45,30 +45,30 @@
                     </thead>
 
                     <tbody>
-                    @if (!page.getUrlChecks().isEmpty())
-                        @for (var check : page.getUrlChecks())
-                            <tr>
-                                <td>
-                                    ${check.getId()}
-                                </td>
-                                <td>
-                                    ${check.getStatusCode()}
-                                </td>
-                                <td>
-                                    ${check.getTitle()}
-                                </td>
-                                <td>
-                                    ${check.getH1()}
-                                </td>
-                                <td>
-                                    ${check.getDescription()}
-                                </td>
-                                <td>
-                                    ${check.getCreatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}
-                                </td>
-                            </tr>
-                        @endfor
-                    @endif
+
+                    @for (var check : page.getUrlChecks())
+                        <tr>
+                            <td>
+                                ${check.getId()}
+                            </td>
+                            <td>
+                                ${check.getStatusCode()}
+                            </td>
+                            <td>
+                                ${check.getTitle()}
+                            </td>
+                            <td>
+                                ${check.getH1()}
+                            </td>
+                            <td>
+                                ${check.getDescription()}
+                            </td>
+                            <td>
+                                ${check.getCreatedAt().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}
+                            </td>
+                        </tr>
+                    @endfor
+
                     </tbody>
                 </table>
             </div>
