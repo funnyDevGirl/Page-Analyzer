@@ -160,7 +160,7 @@ public class AppTest {
                 assertThat(check.getTitle()).isEqualTo("Test Title");
                 assertThat(check.getH1()).isEqualTo("Test Page Analyzer");
                 assertThat(check.getDescription()).isEqualTo("");
-            } catch (final Throwable th) {
+            } catch (final Exception th) {
                 System.out.println(th.getMessage());
             }
         });
