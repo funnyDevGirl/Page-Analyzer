@@ -10,62 +10,94 @@ import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
-import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 
 public class UrlsController {
-    public static void create(Context ctx) {
+    public static void create(Context ctx) throws URISyntaxException {
 
-        var url = ctx.formParamAsClass("url", String.class).get().trim();
-
+        var inputUrl = ctx.formParamAsClass("url", String.class).get();
+        URI parsedUrl;
         try {
-            Url newUrl = getUrl(url);
-
-            if (UrlsRepository.find(newUrl.getName()).isPresent()) {
-                //сохраняю флеш-сообщение:
-                ctx.sessionAttribute("flash", "Страница уже существует");
-                ctx.sessionAttribute("flashType", "warning");
-            } else {
-                UrlsRepository.save(newUrl);
-
-                //сохраняю флеш-сообщение:
-                ctx.sessionAttribute("flash", "Страница успешно добавлена");
-                ctx.sessionAttribute("flashType", "success");
+            parsedUrl = new URI(inputUrl);
+            if (Objects.equals(parsedUrl.getScheme(), null) || Objects.equals(parsedUrl.getAuthority(), null)) {
+                throw new URISyntaxException(parsedUrl.toString(), "Некорректный URL");
             }
-            ctx.redirect(NamedRoutes.urlsPath());
-
         } catch (URISyntaxException e) {
-            var page = new BasePage("Некорректный URL", "error");
+            var page = new BasePage("Некорректный URL", "danger");
             ctx.status(400);
             ctx.render("index.jte", Collections.singletonMap("page", page));
-
-            //прерываю метод, чтобы не сохранялся "null://null":
             return;
         }
-    }
+        parsedUrl = new URI(inputUrl);
 
-    @NotNull
-    private static Url getUrl(String url) throws URISyntaxException {
-        var uri = new URI(url);
-        if (Objects.equals(uri.getScheme(), null) || Objects.equals(uri.getHost(), null)) {
-            throw new URISyntaxException(uri.toString(), "Некорректный URL");
+        var name = parsedUrl.getScheme() + "://" + parsedUrl.getAuthority();
+
+        Url newUrl = new Url(name);
+
+        if (UrlsRepository.find(newUrl.getName()).isPresent()) {
+            //сохраняю флеш-сообщение:
+            ctx.sessionAttribute("flash", "Страница уже существует");
+            ctx.sessionAttribute("flashType", "warning");
+        } else {
+            UrlsRepository.save(newUrl);
+            //сохраняю флеш-сообщение:
+            ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            ctx.sessionAttribute("flashType", "success");
         }
-        String urlName = String.
-                format("%s://%s%s",
-                        uri.getScheme(),
-                        uri.getHost(),
-                        uri.getPort() < 0 || uri.getPort() > 65535 ? "" : ":" + uri.getPort()
-                ).toLowerCase();
-
-        return new Url(urlName);
+        ctx.redirect(NamedRoutes.urlsPath());
     }
+
+
+
+//        var url = ctx.formParamAsClass("url", String.class).get().trim();
+//
+//        try {
+//            Url newUrl = getUrl(url);
+//
+//            if (UrlsRepository.find(newUrl.getName()).isPresent()) {
+//                //сохраняю флеш-сообщение:
+//                ctx.sessionAttribute("flash", "Страница уже существует");
+//                ctx.sessionAttribute("flashType", "warning");
+//            } else {
+//                UrlsRepository.save(newUrl);
+//
+//                //сохраняю флеш-сообщение:
+//                ctx.sessionAttribute("flash", "Страница успешно добавлена");
+//                ctx.sessionAttribute("flashType", "success");
+//            }
+//            ctx.redirect(NamedRoutes.urlsPath());
+//
+//        } catch (URISyntaxException e) {
+//            var page = new BasePage("Некорректный URL", "error");
+//            ctx.status(400);
+//            ctx.render("index.jte", Collections.singletonMap("page", page));
+//
+//            //прерываю метод, чтобы не сохранялся "null://null":
+//            return;
+//        }
+//    }
+
+//    @NotNull
+//    private static Url getUrl(String url) throws URISyntaxException {
+//        var uri = new URI(url);
+//        if (Objects.equals(uri.getScheme(), null) || Objects.equals(uri.getHost(), null)) {
+//            throw new URISyntaxException(uri.toString(), "Некорректный URL");
+//        }
+//        String urlName = String.
+//                format("%s://%s%s",
+//                        uri.getScheme(),
+//                        uri.getHost(),
+//                        uri.getPort() < 0 || uri.getPort() > 65535 ? "" : ":" + uri.getPort()
+//                ).toLowerCase();
+//
+//        return new Url(urlName);
+//    }
 
     public static void index(Context ctx) {
 
@@ -85,13 +117,8 @@ public class UrlsController {
 
         long id = ctx.pathParamAsClass("id", Long.class).get();
 
-        Optional<Url> optional = UrlsRepository.find(id);
-
-        if (optional.isEmpty()) {
-            throw new NotFoundResponse("Url with id = " + id + " not found");
-        }
-
-        Url url = optional.get();
+        Url url = UrlsRepository.find(id)
+                .orElseThrow(() -> new NotFoundResponse("Url with id = " + id + " not found"));
 
         List<UrlCheck> checks = UrlCheckRepository.getChecksById(id);
 
