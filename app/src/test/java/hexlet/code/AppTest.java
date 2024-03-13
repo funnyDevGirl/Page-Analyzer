@@ -4,6 +4,7 @@ import static hexlet.code.App.readResourceFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ import hexlet.code.repository.UrlsRepository;
 import hexlet.code.model.Url;
 import hexlet.code.util.NamedRoutes;
 
+import io.javalin.http.NotFoundResponse;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -101,14 +103,31 @@ public class AppTest {
             assertThat(response.code()).isEqualTo(200);
             assertThat(UrlsRepository.getEntities()).hasSize(2);
 
-            assertTrue(UrlsRepository.find("https://ru.hexlet.io").isPresent());
-            assertEquals("https://ru.hexlet.io",
-                    UrlsRepository.find("https://ru.hexlet.io").get().getName());
-            assertTrue(UrlsRepository.find("https://www.mail.ru").isPresent());
-            assertEquals("https://www.mail.ru",
-                    UrlsRepository.find("https://www.mail.ru").get().getName());
+            Url url1 = UrlsRepository.find("https://ru.hexlet.io")
+                    .orElseThrow(() -> new NotFoundResponse("Url = https://ru.hexlet.io not found"));
+
+            Url url2 = UrlsRepository.find("https://www.mail.ru")
+                    .orElseThrow(() -> new NotFoundResponse("Url = https://www.mail.ru not found"));
+
             assertThat(bodyString).contains("https://www.mail.ru");
             assertThat(bodyString).contains("https://ru.hexlet.io");
+
+            assertFalse(url1.toString().isEmpty());
+            assertEquals("https://ru.hexlet.io",
+                    url1.getName());
+
+            assertFalse(url2.toString().isEmpty());
+            assertEquals("https://www.mail.ru",
+                    url2.getName());
+
+
+            //не оптимально: повторные запросы в БД:
+//            assertTrue(UrlsRepository.find("https://ru.hexlet.io").isPresent());
+//            assertEquals("https://ru.hexlet.io",
+//                    UrlsRepository.find("https://ru.hexlet.io").get().getName());
+//            assertTrue(UrlsRepository.find("https://www.mail.ru").isPresent());
+//            assertEquals("https://www.mail.ru",
+//                    UrlsRepository.find("https://www.mail.ru").get().getName());
         });
     }
 
