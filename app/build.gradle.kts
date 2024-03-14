@@ -27,9 +27,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core:3.25.1")
 
-    implementation("io.javalin:javalin:5.6.2")
-    implementation("io.javalin:javalin-bundle:5.6.2")
-    implementation("io.javalin:javalin-rendering:5.6.2")
+    implementation("io.javalin:javalin:6.1.3")
+    implementation("io.javalin:javalin-rendering:6.1.3")
+    implementation("io.javalin:javalin-bundle:6.1.3")
     implementation("gg.jte:jte:3.1.0")
     implementation("org.slf4j:slf4j-simple:2.0.9")
 
@@ -38,7 +38,7 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 
-    implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.postgresql:postgresql:42.7.2")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.konghq:unirest-java:3.14.5")
