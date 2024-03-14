@@ -21,10 +21,10 @@ import java.util.Objects;
 public class UrlsController {
     public static void create(Context ctx) throws URISyntaxException {
 
-        var inputUrl = ctx.formParamAsClass("url", String.class).get();
+        var inputUrl = ctx.formParam("url");
         URI parsedUrl;
         try {
-            parsedUrl = new URI(inputUrl);
+            parsedUrl = new URI(Objects.requireNonNull(inputUrl));
             if (Objects.equals(parsedUrl.getScheme(), null) || Objects.equals(parsedUrl.getAuthority(), null)) {
                 throw new URISyntaxException(parsedUrl.toString(), "Некорректный URL");
             }
