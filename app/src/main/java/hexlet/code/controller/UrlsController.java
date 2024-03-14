@@ -54,51 +54,6 @@ public class UrlsController {
     }
 
 
-
-//        var url = ctx.formParamAsClass("url", String.class).get().trim();
-//
-//        try {
-//            Url newUrl = getUrl(url);
-//
-//            if (UrlsRepository.find(newUrl.getName()).isPresent()) {
-//                //сохраняю флеш-сообщение:
-//                ctx.sessionAttribute("flash", "Страница уже существует");
-//                ctx.sessionAttribute("flashType", "warning");
-//            } else {
-//                UrlsRepository.save(newUrl);
-//
-//                //сохраняю флеш-сообщение:
-//                ctx.sessionAttribute("flash", "Страница успешно добавлена");
-//                ctx.sessionAttribute("flashType", "success");
-//            }
-//            ctx.redirect(NamedRoutes.urlsPath());
-//
-//        } catch (URISyntaxException e) {
-//            var page = new BasePage("Некорректный URL", "error");
-//            ctx.status(400);
-//            ctx.render("index.jte", Collections.singletonMap("page", page));
-//
-//            //прерываю метод, чтобы не сохранялся "null://null":
-//            return;
-//        }
-//    }
-
-//    @NotNull
-//    private static Url getUrl(String url) throws URISyntaxException {
-//        var uri = new URI(url);
-//        if (Objects.equals(uri.getScheme(), null) || Objects.equals(uri.getHost(), null)) {
-//            throw new URISyntaxException(uri.toString(), "Некорректный URL");
-//        }
-//        String urlName = String.
-//                format("%s://%s%s",
-//                        uri.getScheme(),
-//                        uri.getHost(),
-//                        uri.getPort() < 0 || uri.getPort() > 65535 ? "" : ":" + uri.getPort()
-//                ).toLowerCase();
-//
-//        return new Url(urlName);
-//    }
-
     public static void index(Context ctx) {
 
         //читаю флеш-сообщение из сессии по ключу:
