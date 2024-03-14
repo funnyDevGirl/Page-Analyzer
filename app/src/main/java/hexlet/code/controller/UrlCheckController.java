@@ -7,6 +7,7 @@ import hexlet.code.repository.UrlsRepository;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 
+import io.javalin.http.NotFoundResponse;
 import kong.unirest.Unirest;
 import kong.unirest.UnirestException;
 import org.jsoup.Jsoup;
@@ -14,18 +15,13 @@ import org.jsoup.nodes.Document;
 import kong.unirest.HttpResponse;
 
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class UrlCheckController {
     public static void createCheck(Context ctx) throws SQLException {
         long urlId = ctx.pathParamAsClass("id", Long.class).getOrDefault(null);
 
-        Optional<Url> optional = UrlsRepository.find(urlId);
-
-        if (optional.isEmpty()) {
-            throw new SQLException("No such mane in DB");
-        }
-        Url url = optional.get();
+        Url url = UrlsRepository.find(urlId)
+                .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
 
         try {
             //дергаю страницу по url:
