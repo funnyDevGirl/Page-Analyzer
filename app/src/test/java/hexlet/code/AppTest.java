@@ -120,14 +120,6 @@ public class AppTest {
             assertEquals("https://www.mail.ru",
                     url2.getName());
 
-
-            //не оптимально: повторные запросы в БД:
-//            assertTrue(UrlsRepository.find("https://ru.hexlet.io").isPresent());
-//            assertEquals("https://ru.hexlet.io",
-//                    UrlsRepository.find("https://ru.hexlet.io").get().getName());
-//            assertTrue(UrlsRepository.find("https://www.mail.ru").isPresent());
-//            assertEquals("https://www.mail.ru",
-//                    UrlsRepository.find("https://www.mail.ru").get().getName());
         });
     }
 
@@ -158,8 +150,10 @@ public class AppTest {
     void testUrlNotFound() {
         var id = 9999;
 
+        // Проверка статуса 404 после удаления записи
         JavalinTest.test(app, (server, client) -> {
             var response = client.get(NamedRoutes.urlPath(id));
+            UrlsRepository.delete((long) id);
             assertThat(response.code()).isEqualTo(404);
         });
     }
