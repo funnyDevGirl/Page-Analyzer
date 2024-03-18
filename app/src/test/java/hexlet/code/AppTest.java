@@ -70,7 +70,6 @@ public class AppTest {
         });
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Test
     public void testUrlPage() {
         String input = "https://www.mail.ru";
@@ -85,8 +84,8 @@ public class AppTest {
 
             assertThat(response.code()).isEqualTo(200);
             assertThat(Objects.requireNonNull(response.body()).string()).contains(input);
-            assertEquals(UrlsRepository.find(url.getId()).get().getName(), input);
-            assertEquals(UrlsRepository.find(input).get().getName(), input);
+            assertEquals(UrlsRepository.find(url.getId()).orElseThrow().getName(), input);
+            assertEquals(UrlsRepository.find(input).orElseThrow().getName(), input);
         });
     }
 
@@ -149,11 +148,11 @@ public class AppTest {
     @Test
     void testUrlNotFound() {
         var id = 9999;
+        UrlsRepository.delete((long) id);
 
         // Проверка статуса 404 после удаления записи
         JavalinTest.test(app, (server, client) -> {
             var response = client.get(NamedRoutes.urlPath(id));
-            UrlsRepository.delete((long) id);
             assertThat(response.code()).isEqualTo(404);
         });
     }
