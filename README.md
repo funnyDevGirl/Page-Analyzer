@@ -8,6 +8,8 @@
 ## Page Analyzer is a website that analyzes the specified pages for SEO suitability.
 ### The service is written in Java using the Javelin framework and the JET template engine. The H2 database is used in development and testing, and Postgres is used in production. Bootstrap styles are used to display the front end.
 
+[Demo-video on YouTube](https://youtu.be/BjsUZ6Eyrto)
+
 Demo: https://page-analyzer-1nmy.onrender.com
 
 To run the program, run:
